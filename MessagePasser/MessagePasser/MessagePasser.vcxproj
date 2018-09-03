@@ -74,7 +74,7 @@
     <IntDir>$(ProjectDir)Intermediate\bin\$(Platform)\</IntDir>
     <TargetExt>.dll</TargetExt>
     <TargetName>$(ProjectName)D</TargetName>
-    <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../MessagePasser/MessagePasser/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../Message-Passer/MessagePasser/include;$(IncludePath)</IncludePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
@@ -83,7 +83,7 @@
     <OutDir>$(SolutionDir)Build\bin\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)Intermediate\bin\$(Platform)\</IntDir>
     <TargetExt>.dll</TargetExt>
-    <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../MessagePasser/MessagePasser/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../Message-Passer/MessagePasser/include;$(IncludePath)</IncludePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
@@ -93,7 +93,7 @@
     <IntDir>$(ProjectDir)Intermediate\bin\$(Platform)\</IntDir>
     <TargetExt>.dll</TargetExt>
     <TargetName>$(ProjectName)D</TargetName>
-    <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../MessagePasser/MessagePasser/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../Message-Passer/MessagePasser/include;$(IncludePath)</IncludePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
@@ -102,7 +102,7 @@
     <OutDir>$(SolutionDir)Build\bin\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)Intermediate\bin\$(Platform)\</IntDir>
     <TargetExt>.dll</TargetExt>
-    <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../MessagePasser/MessagePasser/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../Message-Passer/MessagePasser/include;$(IncludePath)</IncludePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
