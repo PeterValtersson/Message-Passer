@@ -52,10 +52,9 @@ namespace UnitTest1
 		bool _actionPerformed;
 		void _performOtherActions() override
 		{
-
 			if (!_actionPerformed)
 			{
-				_sendMessage({ "SimpleClient", "PerformAction" });
+				_sendMessage({ "SimpleClient", "PerformAction", "This is a message"});
 				_actionPerformed = true;
 			}
 		}
@@ -65,8 +64,38 @@ namespace UnitTest1
 	TEST_CLASS(UnitTest1)
 	{
 	public:
+		template<typename T>
+		bool areEqual(std::vector<T> const &v1, std::vector<T> const &v2)
+		{
+			return (v1.size() == v2.size() &&
+				std::equal(v1.begin(), v1.end(), v2.begin()));
+		}
+
+
 		
-		TEST_METHOD(OneToOneCommunicationTest)
+		TEST_METHOD(PayloadCreationTests)
+		{
+		
+			auto constchar = MP::Payload::make("constchar");
+			Assert::AreEqual("constchar", constchar->get<const char[10]>());
+			MP::Message constcharmsg = { "","", "constchar" };
+			Assert::AreEqual("constchar", constcharmsg.payload->get<const char[10]>());
+
+			auto integer = MP::Payload::make(1);
+			Assert::AreEqual(1, integer->get<int>());
+			MP::Message integermsg = { "","", 1 };
+			Assert::AreEqual(1, integermsg.payload->get<int>());
+
+			std::vector<int> intVector = { 1,2,3 };
+			auto intvec = MP::Payload::make(std::move(intVector));		
+			Assert::IsTrue(areEqual({ 1,2,3 }, intvec->get<std::vector<int>>()));
+
+			std::vector<std::string> stringVector = { "Test", "A", "B"};
+			auto intvecptr = MP::Payload::make(&stringVector);
+			Assert::IsTrue(areEqual(stringVector, *intvecptr->get<std::vector<std::string>*>()));
+
+		}
+		TEST_METHOD(PayloadTest)
 		{
 			auto hub = MP::CreateMessageHub();
 			auto simpleClient = std::make_unique<SimpleClient>(hub);

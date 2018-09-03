@@ -90,7 +90,7 @@ namespace MP
 		virtual void _performDelayedActions() {}
 		virtual void _performOtherActions() {}
 
-		void _sendMessage(const Message&& message)
+		void _sendMessage(Message&& message)
 		{
 			_outgoingMessages.push(std::move(message));
 		}

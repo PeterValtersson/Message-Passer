@@ -35,6 +35,7 @@ void MP::MessageHub::HandleMessages() noexcept
 			if (const auto index = find(_clientIdentifiers, message.target); index.has_value())
 			{
 				auto& clientTarget = _clients[*index];
+				message.target = _clientIdentifiers[*index];
 				clientTarget->incommingMessages().push(std::move(message));
 			}
 			messageQueue.pop();
