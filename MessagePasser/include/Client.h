@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 
 namespace MP
 {
-	using MessageHandler = std::function<void(const Message&& message)>;
+	using MessageHandler = std::function<void(Message&& message)>;
 	struct NoMessageHub : public std::exception {
 		NoMessageHub() : std::exception ("A message hub was not provided to client") {}
 		

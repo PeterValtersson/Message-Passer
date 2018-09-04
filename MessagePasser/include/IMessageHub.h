@@ -35,7 +35,8 @@ namespace MP
 	};
 
 	enum class Status {
-
+		Success,
+		Failed
 	};
 
 	struct Message {
