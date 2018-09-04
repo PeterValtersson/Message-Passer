@@ -90,9 +90,11 @@ namespace MP
 		virtual void _performDelayedActions() {}
 		virtual void _performOtherActions() {}
 
-		void _sendMessage(Message&& message)
+		std::future<Status> _sendMessage(Message&& message)
 		{
+			auto statusFuture = message.status.get_future();
 			_outgoingMessages.push(std::move(message));
+			return statusFuture;
 		}
 	private:
 		bool running;

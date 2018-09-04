@@ -2,6 +2,7 @@
 #define _INTERFACE_MESSAGE_HUB_H_
 #include <memory>
 #include <GUID.h>
+#include <future>
 
 namespace MP
 {
@@ -33,10 +34,15 @@ namespace MP
 		virtual const void* _get()const = 0;
 	};
 
+	enum class Status {
+
+	};
+
 	struct Message {
 		Utilities::GUID target;
-		Utilities::GUID identifier;
+		Utilities::GUID identifier;	
 		std::unique_ptr<Payload> payload;
+		std::promise<Status> status;
 		Message() {}
 		Message(const Utilities::GUID target, const Utilities::GUID identifier)
 			: target(target), identifier(identifier)

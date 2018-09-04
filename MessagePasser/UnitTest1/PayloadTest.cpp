@@ -65,7 +65,7 @@ namespace UnitTest1
 	{
 	public:
 		template<typename T>
-		bool areEqual(std::vector<T> const &v1, std::vector<T> const &v2)
+		bool areEqual(const std::vector<T>& v1, const std::vector<T>& v2)
 		{
 			return (v1.size() == v2.size() &&
 				std::equal(v1.begin(), v1.end(), v2.begin()));
