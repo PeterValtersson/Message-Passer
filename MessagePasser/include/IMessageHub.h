@@ -33,11 +33,12 @@ namespace MP
 		Payload() {}
 		virtual const void* _get()const = 0;
 	};
-
 	enum class Status {
 		Success,
 		Failed
 	};
+
+	using MessageReturn = std::future<Status>;
 
 	struct Message {
 		Utilities::GUID target;

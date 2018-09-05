@@ -58,7 +58,7 @@ namespace UnitTest1
 
 			if (!_actionPerformed)
 			{
-				_sendMessage({ "SimpleClient", "PerformAction" });
+				sendMessage({ "SimpleClient", "PerformAction" });
 				_actionPerformed = true;
 			}
 		}
@@ -118,7 +118,7 @@ namespace UnitTest1
 
 			if (!_actionPerformed)
 			{
-				_future = _sendMessage({ "SimpleClient", "PerformAction" });
+				_future = sendMessage({ "SimpleClient", "PerformAction" });
 				_actionPerformed = true;
 			}
 		}

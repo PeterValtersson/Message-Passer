@@ -55,7 +55,7 @@ namespace UnitTest1
 		{
 			if (!_actionPerformed)
 			{
-				_sendMessage({ "SimpleClient", "PerformAction", "This is a message"});
+				sendMessage({ "SimpleClient", "PerformAction", "This is a message"});
 				_actionPerformed = true;
 			}
 		}
