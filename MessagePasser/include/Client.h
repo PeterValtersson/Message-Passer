@@ -17,6 +17,7 @@ using namespace std::chrono_literals;
 
 namespace MP
 {
+
 	using MessageHandler = std::function<void(Message&& message)>;
 	struct NoMessageHub : public std::exception {
 		NoMessageHub() : std::exception ("A message hub was not provided to client") {}
@@ -108,30 +109,14 @@ namespace MP
 		Utilities::CircularFiFo<Message> _incommingMessages;
 		Utilities::CircularFiFo<Message> _outgoingMessages;
 		
-		void _threadEntryPoint() 
-		{
-			
-			while (running)
-			{
-				const auto startTime = std::chrono::high_resolution_clock::now();
-				while (!_incommingMessages.wasEmpty())
-				{
-					auto& message = _incommingMessages.top();
-					if (const auto& index = find(_messageIdentifiers, message.identifier); !index.has_value())
-						index; // Unknown message recevied. Add a log or something.
-					else
-						_messageHandlers[*index](std::move(message));
-					_incommingMessages.pop();
-				}
-				_performDelayedActions();
-				_performOtherActions();
-				const auto endTime = std::chrono::high_resolution_clock::now();
-				const auto executionTime = endTime - startTime;
-				if (executionTime < _timePerFrame) // We wait to lock the update frequency.
-					std::this_thread::sleep_for(_timePerFrame - executionTime);
-			}
-		}
-
+		void _threadEntryPoint();
 	};
+
+	struct NoLocalClient : public std::runtime_error {
+		NoLocalClient() : std::runtime_error("No local client could be found") {}
+	};
+	extern thread_local std::shared_ptr<Client> localClient;
+	std::shared_ptr<Client> getLocalClient();
 }
+
 #endif

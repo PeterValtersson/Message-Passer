@@ -62,7 +62,7 @@ namespace MP
 	class IMessageHub {
 	public:
 		virtual ~IMessageHub() {}
-		virtual void AddClient(std::unique_ptr<Client>&& client) = 0;
+		virtual void AddClient(std::shared_ptr<Client> client) = 0;
 		virtual void StartAllClients() noexcept = 0;
 		virtual void HandleMessages() noexcept = 0;
 	protected:

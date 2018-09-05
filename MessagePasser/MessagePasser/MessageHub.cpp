@@ -9,13 +9,13 @@ MP::MessageHub::~MessageHub()
 	
 }
 
-void MP::MessageHub::AddClient(std::unique_ptr<Client>&& client)
+void MP::MessageHub::AddClient(std::shared_ptr<Client> client)
 {
 	if (const auto index = find(_clientIdentifiers, client->Identifier()); index.has_value())
 		throw ClientDuplicate();
 
 	_clientIdentifiers.push_back(client->Identifier());
-	_clients.push_back(std::move(client));
+	_clients.push_back(client);
 }
 
 void MP::MessageHub::StartAllClients() noexcept

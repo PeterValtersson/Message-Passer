@@ -99,15 +99,13 @@ namespace UnitTest1
 		TEST_METHOD(PayloadTest)
 		{
 			auto hub = MP::CreateMessageHub();
-			auto simpleClient = std::make_unique<SimpleClient>(hub);
-			auto scPtr = simpleClient.get();
-			hub->AddClient(std::move(simpleClient));
-			auto userClient = std::make_unique<UserClient>(hub);
-			auto ucPtr = userClient.get();
-			hub->AddClient(std::move(userClient));
+			auto simpleClient = std::make_shared<SimpleClient>(hub);
+			hub->AddClient(simpleClient);
+			auto userClient = std::make_shared<UserClient>(hub);
+			hub->AddClient(userClient);
 			hub->StartAllClients();
 
-			while (scPtr->actionNotPerformed() || ucPtr->actionNotPerformed())
+			while (simpleClient->actionNotPerformed() || userClient->actionNotPerformed())
 				hub->HandleMessages();
 
 		}
