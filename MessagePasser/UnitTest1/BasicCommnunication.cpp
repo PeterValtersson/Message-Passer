@@ -21,11 +21,13 @@ namespace UnitTest1
 		bool actionNotPerformed()const noexcept
 		{
 			return !_actionPerformed;
-		}
+		}	
+
 	private:
 		bool _actionPerformed;
 		void _performAction(MP::Message&& message)
 		{
+			int a = 0;
 			_actionPerformed = true;
 		}
 
@@ -48,6 +50,7 @@ namespace UnitTest1
 		{
 			return !_actionPerformed;
 		}
+	
 	private:
 		bool _actionPerformed;
 		void _performOtherActions() override
@@ -103,15 +106,19 @@ namespace UnitTest1
 		{
 			return !_actionPerformed;
 		}
+		std::future<MP::Status>& getFuture()
+		{
+			return _future;
+		}
 	private:
 		bool _actionPerformed;
+		std::future<MP::Status> _future;
 		void _performOtherActions() override
 		{
 
 			if (!_actionPerformed)
 			{
-				auto future = _sendMessage({ "SimpleClient", "PerformAction" });
-				Assert::IsTrue(MP::Status::Success == future.get());
+				_future = _sendMessage({ "SimpleClient", "PerformAction" });
 				_actionPerformed = true;
 			}
 		}
@@ -128,10 +135,10 @@ namespace UnitTest1
 			auto userClient = std::make_shared<UserClient>(hub);
 			hub->AddClient(userClient);
 			hub->StartAllClients();
-
 			while (simpleClient->actionNotPerformed() || userClient->actionNotPerformed())
 				hub->HandleMessages();
-
+			Assert::IsFalse(simpleClient->actionNotPerformed());
+			Assert::IsFalse(userClient->actionNotPerformed());
 		}
 		TEST_METHOD(FutureTest)
 		{
@@ -144,7 +151,10 @@ namespace UnitTest1
 
 			while (simpleClient->actionNotPerformed() || userClient->actionNotPerformed())
 				hub->HandleMessages();
-
+			Assert::IsFalse(simpleClient->actionNotPerformed());
+			Assert::IsFalse(userClient->actionNotPerformed());
+			auto& future = userClient->getFuture();
+			Assert::IsTrue(MP::Status::Success == future.get());
 		}
 	};
 }

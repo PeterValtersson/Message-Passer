@@ -11,12 +11,19 @@
 
 #include "IMessageHub.h"
 #include <HelperFunction.h>
+#include "DLL_Export.h"
 
 using namespace std::placeholders;
 using namespace std::chrono_literals;
 
 namespace MP
 {
+	class Client;
+	struct NoLocalClient : public std::runtime_error {
+		NoLocalClient() : std::runtime_error("No local client could be found") {}
+	};
+	DECLSPEC std::shared_ptr<Client> getLocalClient();
+	DECLSPEC void setLocalClient(std::shared_ptr<Client> client);
 
 	using MessageHandler = std::function<void(Message&& message)>;
 	struct NoMessageHub : public std::exception {
@@ -33,6 +40,43 @@ namespace MP
 	};
 	class Client {
 	public:
+		virtual ~Client() noexcept
+		{
+			Stop();
+		}
+
+		void AddMessageHandlerPair(const MessageHandlerPair& toAdd) {
+			if (const auto index = find(_messageIdentifiers, toAdd.identifier); index.has_value())
+				throw MessageDuplicate();
+			_messageIdentifiers.push_back(toAdd.identifier);
+			_messageHandlers.push_back(std::move(toAdd.handler));
+		}
+
+		virtual void Start(std::shared_ptr<Client> me) noexcept
+		{
+			running = true;
+			_myThread = std::thread(&Client::_threadEntryPoint, this, me);
+		}
+
+		virtual void Stop() noexcept
+		{
+			running = false;
+			if(_myThread.joinable())
+				_myThread.join();
+		}
+
+		virtual const Utilities::GUID Identifier()const noexcept = 0;
+
+		inline auto& outgoingMessages() noexcept
+		{
+			return _outgoingMessages;
+		}
+		inline auto& incommingMessages() noexcept
+		{
+			return _incommingMessages;
+		}
+
+	protected:
 		Client(std::shared_ptr<IMessageHub> messageHub, std::chrono::milliseconds timePerFrame) : _messageHub(messageHub), running(false), _timePerFrame(timePerFrame)
 		{
 			if (!_messageHub) throw NoMessageHub();
@@ -51,47 +95,11 @@ namespace MP
 			for (const auto& pair : messageHandlerPairs)
 				AddMessageHandlerPair(pair);
 		};
-		virtual ~Client() 
-		{
-			Stop();
-		}
 
-		void AddMessageHandlerPair(const MessageHandlerPair& toAdd) {
-			if (const auto index = find(_messageIdentifiers, toAdd.identifier); index.has_value())
-				throw MessageDuplicate();
-			_messageIdentifiers.push_back(toAdd.identifier);
-			_messageHandlers.push_back(std::move(toAdd.handler));
-		}
-
-		virtual void Start() noexcept
-		{
-			running = true;
-			_myThread = std::thread(&Client::_threadEntryPoint, this);
-		}
-
-		virtual void Stop() noexcept
-		{
-			running = false;
-			if(_myThread.joinable())
-				_myThread.join();
-		}
-
-		virtual const Utilities::GUID Identifier()const noexcept = 0;
-
-		inline auto& outgoingMessages()
-		{
-			return _outgoingMessages;
-		}
-		inline auto& incommingMessages()
-		{
-			return _incommingMessages;
-		}
-
-	protected:
 		virtual void _performDelayedActions() {}
 		virtual void _performOtherActions() {}
 
-		std::future<Status> _sendMessage(Message&& message)
+		std::future<Status> _sendMessage(Message&& message) noexcept
 		{
 			auto statusFuture = message.status.get_future();
 			_outgoingMessages.push(std::move(message));
@@ -109,14 +117,31 @@ namespace MP
 		Utilities::CircularFiFo<Message> _incommingMessages;
 		Utilities::CircularFiFo<Message> _outgoingMessages;
 		
-		void _threadEntryPoint();
+		void _threadEntryPoint(std::shared_ptr<Client> me)
+		{
+			setLocalClient(me);
+			while (running)
+			{
+				const auto startTime = std::chrono::high_resolution_clock::now();
+				while (!_incommingMessages.wasEmpty())
+				{
+					auto& message = _incommingMessages.top();
+					if (const auto& index = find(_messageIdentifiers, message.identifier); !index.has_value())
+						index; // Unknown message recevied. Add a log or something.
+					else
+						_messageHandlers[*index](std::move(message));
+					_incommingMessages.pop();
+				}
+				_performDelayedActions();
+				_performOtherActions();
+				const auto endTime = std::chrono::high_resolution_clock::now();
+				const auto executionTime = endTime - startTime;
+				if (executionTime < _timePerFrame) // We wait to lock the update frequency.
+					std::this_thread::sleep_for(_timePerFrame - executionTime);
+			}
+		}
 	};
 
-	struct NoLocalClient : public std::runtime_error {
-		NoLocalClient() : std::runtime_error("No local client could be found") {}
-	};
-	extern thread_local std::shared_ptr<Client> localClient;
-	std::shared_ptr<Client> getLocalClient();
 }
 
 #endif

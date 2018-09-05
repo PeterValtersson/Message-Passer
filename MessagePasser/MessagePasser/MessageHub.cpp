@@ -21,7 +21,7 @@ void MP::MessageHub::AddClient(std::shared_ptr<Client> client)
 void MP::MessageHub::StartAllClients() noexcept
 {
 	for (auto& client : _clients)
-		client->Start();
+		client->Start(client);
 }
 
 void MP::MessageHub::HandleMessages() noexcept

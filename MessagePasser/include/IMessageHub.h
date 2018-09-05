@@ -3,7 +3,7 @@
 #include <memory>
 #include <GUID.h>
 #include <future>
-
+#include "DLL_Export.h"
 namespace MP
 {
 	class Client;
@@ -72,12 +72,7 @@ namespace MP
 		
 	};
 
-#if defined DLL_EXPORT_MESSAGE_PASSER
-#define DECLDIR __declspec(dllexport)
-#else
-#define DECLDIR __declspec(dllimport)
-#endif
-	DECLDIR std::shared_ptr<IMessageHub> CreateMessageHub();
+	DECLSPEC std::shared_ptr<IMessageHub> CreateMessageHub();
 
 }
 

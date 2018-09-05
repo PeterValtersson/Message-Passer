@@ -73,7 +73,7 @@
     <OutDir>$(SolutionDir)Build\bin\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)Intermediate\bin\$(Platform)\</IntDir>
     <TargetExt>.dll</TargetExt>
-    <TargetName>$(ProjectName)D</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
     <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../Message-Passer/MessagePasser/include;$(IncludePath)</IncludePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
@@ -92,7 +92,7 @@
     <OutDir>$(SolutionDir)Build\bin\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)Intermediate\bin\$(Platform)\</IntDir>
     <TargetExt>.dll</TargetExt>
-    <TargetName>$(ProjectName)D</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
     <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../Message-Passer/MessagePasser/include;$(IncludePath)</IncludePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
@@ -113,7 +113,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);DLL_EXPORT_MESSAGE_PASSER;;__PROFILE;_P_NS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MP_EXPORT_;_WINDLL;%(PreprocessorDefinitions);DLL_EXPORT_MESSAGE_PASSER;;__PROFILE;_P_NS</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -123,7 +123,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);DLL_EXPORT_MESSAGE_PASSER;;__PROFILE;_P_NS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MP_EXPORT_;_WINDLL;%(PreprocessorDefinitions);DLL_EXPORT_MESSAGE_PASSER;;__PROFILE;_P_NS</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -135,7 +135,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);DLL_EXPORT_MESSAGE_PASSER;;__PROFILE;_P_NS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MP_EXPORT_;_WINDLL;%(PreprocessorDefinitions);DLL_EXPORT_MESSAGE_PASSER;;__PROFILE;_P_NS</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
@@ -151,7 +151,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);DLL_EXPORT_MESSAGE_PASSER;;__PROFILE;_P_NS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MP_EXPORT_;_WINDLL;%(PreprocessorDefinitions);DLL_EXPORT_MESSAGE_PASSER;;__PROFILE;_P_NS</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
@@ -160,13 +160,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\DLL_Export.h" />
     <ClInclude Include="..\include\IMessageHub.h" />
     <ClInclude Include="..\include\Client.h" />
+    <ClInclude Include="LocalClient.h" />
     <ClInclude Include="MessageHub.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\include\Client.cpp" />
+    <ClCompile Include="Client.cpp" />
     <ClCompile Include="IMessageHub.cpp" />
+    <ClCompile Include="LocalClient.cpp" />
     <ClCompile Include="MessageHub.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
