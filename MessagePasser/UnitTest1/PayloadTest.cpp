@@ -24,7 +24,7 @@ namespace UnitTest1
 		}
 	private:
 		bool _actionPerformed;
-		void _performAction(MP::Message&& message)
+		void _performAction(MP::Message& message)
 		{
 			_actionPerformed = true;
 			Assert::AreEqual("This is a message", message.payload->get<const char[18]>());

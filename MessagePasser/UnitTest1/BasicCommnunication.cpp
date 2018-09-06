@@ -25,7 +25,7 @@ namespace UnitTest1
 
 	private:
 		bool _actionPerformed;
-		void _performAction(MP::Message&& message)
+		void _performAction(MP::Message& message)
 		{
 			int a = 0;
 			_actionPerformed = true;
@@ -63,6 +63,10 @@ namespace UnitTest1
 			}
 		}
 	};
+	enum class Status {
+		Success,
+		Failed
+	};
 
 	class SimpleClientPromise : public MP::Client {
 	public:
@@ -81,9 +85,9 @@ namespace UnitTest1
 		}
 	private:
 		bool _actionPerformed;
-		void _performAction(MP::Message&& message)
+		void _performAction(MP::Message& message)
 		{
-			message.status.set_value(MP::Status::Success);
+			message.setReturn(Status::Success);
 			_actionPerformed = true;	
 		}
 
@@ -106,13 +110,13 @@ namespace UnitTest1
 		{
 			return !_actionPerformed;
 		}
-		std::future<MP::Status>& getFuture()
+		MP::MessageReturn& getFuture()
 		{
 			return _future;
 		}
 	private:
 		bool _actionPerformed;
-		std::future<MP::Status> _future;
+		MP::MessageReturn _future;
 		void _performOtherActions() override
 		{
 
@@ -154,7 +158,8 @@ namespace UnitTest1
 			Assert::IsFalse(simpleClient->actionNotPerformed());
 			Assert::IsFalse(userClient->actionNotPerformed());
 			auto& future = userClient->getFuture();
-			Assert::IsTrue(MP::Status::Success == future.get());
+			auto status = future.get();
+			Assert::IsTrue(Status::Success == status->get<Status>());
 		}
 	};
 }

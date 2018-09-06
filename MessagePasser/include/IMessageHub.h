@@ -33,19 +33,38 @@ namespace MP
 		Payload() {}
 		virtual const void* _get()const = 0;
 	};
-	enum class Status {
-		Success,
-		Failed
-	};
-
-	using MessageReturn = std::future<Status>;
+	
+	using MessageReturn = std::future<std::unique_ptr<Payload>>;
 
 	struct Message {
 		Utilities::GUID target;
 		Utilities::GUID identifier;	
 		std::unique_ptr<Payload> payload;
-		std::promise<Status> status;
+		std::promise<std::unique_ptr<Payload>> messageReturn;
 		Message() {}
+		~Message() 
+		{	
+			try
+			{
+				messageReturn.set_value(nullptr);
+			}
+			catch (std::future_error& error) { error;/* Fails if setReturn has been called*/ }
+		}
+		Message(Message&& other)
+		{
+			target = other.target;
+			identifier = other.identifier;
+			payload = std::move(other.payload);
+			messageReturn = std::move(other.messageReturn);
+		}
+		Message& operator=(Message&& other)
+		{
+			target = other.target;
+			identifier = other.identifier;
+			payload = std::move(other.payload);
+			messageReturn = std::move(other.messageReturn);
+			return *this;
+		}
 		Message(const Utilities::GUID target, const Utilities::GUID identifier)
 			: target(target), identifier(identifier)
 		{}
@@ -53,6 +72,16 @@ namespace MP
 		Message(const Utilities::GUID target, const Utilities::GUID identifier, DataType&& data) 
 			: target(target), identifier(identifier), payload(Payload::make(std::move(data)))
 		{}
+		template<typename DataType>
+		void setReturn(DataType&& data)
+		{
+			try
+			{
+				messageReturn.set_value(Payload::make(std::move(data)));
+			}
+			catch (std::future_error& error) { error; }
+			
+		}
 	};
 
 	struct ClientDuplicate : public std::exception {

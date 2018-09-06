@@ -25,7 +25,7 @@ namespace MP
 	DECLSPEC std::shared_ptr<Client> getLocalClient();
 	DECLSPEC void setLocalClient(std::shared_ptr<Client> client);
 
-	using MessageHandler = std::function<void(Message&& message)>;
+	using MessageHandler = std::function<void(Message& message)>;
 	struct NoMessageHub : public std::exception {
 		NoMessageHub() : std::exception ("A message hub was not provided to client") {}
 	};
@@ -83,9 +83,9 @@ namespace MP
 		{
 			if (std::this_thread::get_id() != _threadID)
 				throw MessageFromInvalidThread();
-			auto statusFuture = message.status.get_future();
+			auto messageReturn = message.messageReturn.get_future();
 			_outgoingMessages.push(std::move(message));
-			return statusFuture;
+			return messageReturn;
 		}
 
 	protected:
@@ -135,11 +135,11 @@ namespace MP
 				const auto startTime = std::chrono::high_resolution_clock::now();
 				while (!_incommingMessages.wasEmpty())
 				{
-					auto& message = _incommingMessages.top();
+					auto message = std::move(_incommingMessages.top());
 					if (const auto& index = find(_messageIdentifiers, message.identifier); !index.has_value())
 						index; // Unknown message recevied. Add a log or something.
 					else
-						_messageHandlers[*index](std::move(message));
+						_messageHandlers[*index](message);
 					_incommingMessages.pop();
 				}
 				_performDelayedActions();
