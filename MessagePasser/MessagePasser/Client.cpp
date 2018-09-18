@@ -8,7 +8,7 @@ std::shared_ptr<MP::Client> MP::getLocalClient()
 		throw NoLocalClient();
 }
 
-DECLSPEC void MP::setLocalClient(std::shared_ptr<Client> client)
+void MP::setLocalClient(std::shared_ptr<Client> client)
 {
 	localClient = client;
 }

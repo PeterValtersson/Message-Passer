@@ -22,8 +22,8 @@ namespace MP
 	struct NoLocalClient : public std::runtime_error {
 		NoLocalClient() : std::runtime_error("No local client could be found") {}
 	};
-	DECLSPEC std::shared_ptr<Client> getLocalClient();
-	DECLSPEC void setLocalClient(std::shared_ptr<Client> client);
+	DECLSPEC_MP std::shared_ptr<Client> getLocalClient();
+	DECLSPEC_MP void setLocalClient(std::shared_ptr<Client> client);
 
 	using MessageHandler = std::function<void(Message& message)>;
 	struct NoMessageHub : public std::exception {

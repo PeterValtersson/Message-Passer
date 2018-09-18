@@ -102,7 +102,7 @@ namespace MP
 		
 	};
 
-	DECLSPEC std::shared_ptr<IMessageHub> createMessageHub();
+	DECLSPEC_MP std::shared_ptr<IMessageHub> createMessageHub();
 
 }
 

@@ -98,7 +98,7 @@ namespace UnitTest1
 		}
 		TEST_METHOD(PayloadTest)
 		{
-			auto hub = MP::CreateMessageHub();
+			auto hub = MP::createMessageHub();
 			auto simpleClient = std::make_shared<SimpleClient>(hub);
 			hub->AddClient(simpleClient);
 			auto userClient = std::make_shared<UserClient>(hub);

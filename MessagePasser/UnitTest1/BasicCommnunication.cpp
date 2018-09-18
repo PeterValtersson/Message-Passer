@@ -133,7 +133,7 @@ namespace UnitTest1
 		
 		TEST_METHOD(OneToOneCommunicationTest)
 		{
-			auto hub = MP::CreateMessageHub();
+			auto hub = MP::createMessageHub();
 			auto simpleClient = std::make_shared<SimpleClient>(hub);
 			hub->AddClient(simpleClient);
 			auto userClient = std::make_shared<UserClient>(hub);
@@ -146,7 +146,7 @@ namespace UnitTest1
 		}
 		TEST_METHOD(FutureTest)
 		{
-			auto hub = MP::CreateMessageHub();
+			auto hub = MP::createMessageHub();
 			auto simpleClient = std::make_shared<SimpleClientPromise>(hub);
 			hub->AddClient(simpleClient);
 			auto userClient = std::make_shared<UserClientFuture>(hub);
