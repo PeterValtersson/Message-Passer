@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)Build\bin\$(Platform)\</OutDir>
-    <IntDir>$(ProjectDir)Intermediate\bin\$(Platform)\</IntDir>
+    <OutDir>$(SolutionDir)Build/$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(ProjectDir)Intermediate/$(Configuration)/$(Platform)/</IntDir>
     <TargetExt>.dll</TargetExt>
     <TargetName>$(ProjectName)</TargetName>
     <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../Message-Passer/MessagePasser/include;$(IncludePath)</IncludePath>
@@ -80,8 +80,8 @@
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)Build\bin\$(Platform)\</OutDir>
-    <IntDir>$(ProjectDir)Intermediate\bin\$(Platform)\</IntDir>
+    <OutDir>$(SolutionDir)Build/$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(ProjectDir)Intermediate/$(Configuration)/$(Platform)/</IntDir>
     <TargetExt>.dll</TargetExt>
     <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../Message-Passer/MessagePasser/include;$(IncludePath)</IncludePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -89,8 +89,8 @@
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)Build\bin\$(Platform)\</OutDir>
-    <IntDir>$(ProjectDir)Intermediate\bin\$(Platform)\</IntDir>
+    <OutDir>$(SolutionDir)Build/$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(ProjectDir)Intermediate/$(Configuration)/$(Platform)/</IntDir>
     <TargetExt>.dll</TargetExt>
     <TargetName>$(ProjectName)</TargetName>
     <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../Message-Passer/MessagePasser/include;$(IncludePath)</IncludePath>
@@ -99,8 +99,8 @@
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)Build\bin\$(Platform)\</OutDir>
-    <IntDir>$(ProjectDir)Intermediate\bin\$(Platform)\</IntDir>
+    <OutDir>$(SolutionDir)Build/$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(ProjectDir)Intermediate/$(Configuration)/$(Platform)/</IntDir>
     <TargetExt>.dll</TargetExt>
     <IncludePath>$(SolutionDir)../../Utilities/Utilities/Include/;$(SolutionDir)../../Message-Passer/MessagePasser/include;$(IncludePath)</IncludePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
