@@ -57,6 +57,8 @@ namespace MP
 
 		virtual void Start(std::shared_ptr<Client> me) noexcept
 		{
+			if (running)
+				return;
 			running = true;
 			_myThread = std::thread(&Client::_threadEntryPoint, this, me);
 		}
