@@ -6,15 +6,25 @@
 
 namespace MP
 {
-	class MessageHub final : public IMessageHub {
+	class MessageHub final : public IMessageHub , public Client {
 	public:
+		MessageHub();
 		~MessageHub();
-		void AddClient(std::shared_ptr<Client> client) override;
-		void StartAllClients() noexcept override;
-		void HandleMessages() noexcept override;
+		void addClient( Client* client ) override;
+		//void StartAllClients() noexcept override;
+		
+		void run()noexcept override;
+
+		const Utilities::GUID identifier()const noexcept override;
+		void start()noexcept override;
+		void stop()noexcept override;
+	protected:
+		void _performOtherActions()noexcept override;
 	private:
+		void handleMessages() noexcept override;
+
 		std::vector<Utilities::GUID> _clientIdentifiers;
-		std::vector<std::shared_ptr<Client>> _clients;
+		std::vector<Client*> _clients;
 	};
 
 }

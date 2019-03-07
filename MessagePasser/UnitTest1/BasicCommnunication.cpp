@@ -7,124 +7,46 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace UnitTest1
 {
-	class SimpleClient : public MP::Client {
+	class Test : public MP::Client {
 	public:
-		SimpleClient(std::shared_ptr<MP::IMessageHub> hub) : MP::Client(hub, 16ms), _actionPerformed(false)
+		Test( ) : MP::Client( 16ms )
 		{
-			AddMessageHandlerPair({ "PerformAction", std::bind(&SimpleClient::_performAction, this, _1) });
+			addMessageHandlerPair( { "PerformAction", std::bind( &Test::_performAction, this, _1 ) } );
 		}
-		~SimpleClient() {}
-		const Utilities::GUID Identifier()const noexcept
+		~Test() { }
+		const Utilities::GUID identifier()const noexcept override
 		{
-			return "SimpleClient"_hash;
+			return Utilities::EnsureHash<"TestClient"_hash>::value;
 		}
-		bool actionNotPerformed()const noexcept
-		{
-			return !_actionPerformed;
-		}	
-
 	private:
-		bool _actionPerformed;
-		void _performAction(MP::Message& message)
+		void _performAction( MP::Message& message )
 		{
-			int a = 0;
-			_actionPerformed = true;
-		}
-
-
-	};
-	class UserClient : public MP::Client {
-	public:
-		UserClient(std::shared_ptr<MP::IMessageHub> hub) : MP::Client(hub, 16ms), _actionPerformed(false)
-		{
-
-		}
-		const Utilities::GUID Identifier()const noexcept override
-		{
-			return "UserClient"_hash;
-		}
-
-		~UserClient() {}
-
-		bool actionNotPerformed()const noexcept
-		{
-			return !_actionPerformed;
-		}
-	
-	private:
-		bool _actionPerformed;
-		void _performOtherActions() override
-		{
-
-			if (!_actionPerformed)
+			int r = 0;
+			while ( r != 1000 )
 			{
-				sendMessage({ "SimpleClient", "PerformAction" });
-				_actionPerformed = true;
+				auto ret = sendMessage( MP::Message("TestClient2"_hash, "PerformAction"_hash,r) );
+				r = ret.get()->get<int>();
 			}
+			sendMessage( { "Hub"_hash, "Stop"_hash } );
 		}
-	};
-	enum class Status {
-		Success,
-		Failed
 	};
 
-	class SimpleClientPromise : public MP::Client {
+	class Test2 : public MP::Client {
 	public:
-		SimpleClientPromise(std::shared_ptr<MP::IMessageHub> hub) : MP::Client(hub, 16ms), _actionPerformed(false)
+		Test2() : MP::Client( 16ms )
 		{
-			AddMessageHandlerPair({ "PerformAction", std::bind(&SimpleClientPromise::_performAction, this, _1) });
+			addMessageHandlerPair( { "PerformAction", std::bind( &Test2::_performAction, this, _1 ) } );
 		}
-		~SimpleClientPromise() {}
-		const Utilities::GUID Identifier()const noexcept
+		~Test2() { }
+		const Utilities::GUID identifier()const noexcept override
 		{
-			return "SimpleClient"_hash;
-		}
-		bool actionNotPerformed()const noexcept
-		{
-			return !_actionPerformed;
+			return Utilities::EnsureHash<"TestClient2"_hash>::value;
 		}
 	private:
-		bool _actionPerformed;
-		void _performAction(MP::Message& message)
+		void _performAction( MP::Message& message )
 		{
-			message.setReturn(Status::Success);
-			_actionPerformed = true;	
-		}
-
-
-	};
-	class UserClientFuture : public MP::Client {
-	public:
-		UserClientFuture(std::shared_ptr<MP::IMessageHub> hub) : MP::Client(hub, 16ms), _actionPerformed(false)
-		{
-
-		}
-		const Utilities::GUID Identifier()const noexcept override
-		{
-			return "UserClient"_hash;
-		}
-
-		~UserClientFuture() {}
-
-		bool actionNotPerformed()const noexcept
-		{
-			return !_actionPerformed;
-		}
-		MP::MessageReturn& getFuture()
-		{
-			return _future;
-		}
-	private:
-		bool _actionPerformed;
-		MP::MessageReturn _future;
-		void _performOtherActions() override
-		{
-
-			if (!_actionPerformed)
-			{
-				_future = sendMessage({ "SimpleClient", "PerformAction" });
-				_actionPerformed = true;
-			}
+			auto r = message.payload->get<int>();
+			message.setReturn( r+1 );
 		}
 	};
 	TEST_CLASS(UnitTest1)
@@ -133,33 +55,15 @@ namespace UnitTest1
 		
 		TEST_METHOD(OneToOneCommunicationTest)
 		{
-			auto hub = MP::createMessageHub();
-			auto simpleClient = std::make_shared<SimpleClient>(hub);
-			hub->AddClient(simpleClient);
-			auto userClient = std::make_shared<UserClient>(hub);
-			hub->AddClient(userClient);
-			hub->StartAllClients();
-			while (simpleClient->actionNotPerformed() || userClient->actionNotPerformed())
-				hub->HandleMessages();
-			Assert::IsFalse(simpleClient->actionNotPerformed());
-			Assert::IsFalse(userClient->actionNotPerformed());
-		}
-		TEST_METHOD(FutureTest)
-		{
-			auto hub = MP::createMessageHub();
-			auto simpleClient = std::make_shared<SimpleClientPromise>(hub);
-			hub->AddClient(simpleClient);
-			auto userClient = std::make_shared<UserClientFuture>(hub);
-			hub->AddClient(userClient);
-			hub->StartAllClients();
+			auto hub = MP::IMessageHub::get();
+			auto test = std::make_unique<Test>();
+			test->sendMessage( { "TestClient"_hash, "PerformAction"_hash } );
+			hub->addClient( test.get() );
+			auto test2 = std::make_unique<Test2>();
+			hub->addClient( test2.get() );
+			hub->run();
 
-			while (simpleClient->actionNotPerformed() || userClient->actionNotPerformed())
-				hub->HandleMessages();
-			Assert::IsFalse(simpleClient->actionNotPerformed());
-			Assert::IsFalse(userClient->actionNotPerformed());
-			auto& future = userClient->getFuture();
-			auto status = future.get();
-			Assert::IsTrue(Status::Success == status->get<Status>());
 		}
+		
 	};
 }

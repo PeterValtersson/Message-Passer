@@ -8,9 +8,9 @@
 #include <thread>
 #include <vector>
 #include <chrono>
-
+#include <ErrorHandling.h>
 #include "IMessageHub.h"
-#include <HelperFunction.h>
+#include <MonadicOptional.h>
 #include "DLL_Export.h"
 
 using namespace std::placeholders;
@@ -19,21 +19,21 @@ using namespace std::chrono_literals;
 namespace MP
 {
 	class Client;
-	struct NoLocalClient : public std::runtime_error {
-		NoLocalClient() : std::runtime_error("No local client could be found") {}
+	/*struct NoLocalClient : public Utilities::Exception {
+		NoLocalClient() : Utilities::Exception("No local client could be found") {}
 	};
 	DECLSPEC_MP std::shared_ptr<Client> getLocalClient();
-	DECLSPEC_MP void setLocalClient(std::shared_ptr<Client> client);
+	DECLSPEC_MP void setLocalClient(std::shared_ptr<Client> client);*/
 
-	using MessageHandler = std::function<void(Message& message)>;
-	struct NoMessageHub : public std::exception {
-		NoMessageHub() : std::exception ("A message hub was not provided to client") {}
+	using MessageHandler = std::function<void( Message& message )>;
+	/*struct NoMessageHub : Utilities::Exception {
+		NoMessageHub() : Utilities::Exception( "A message hub was not provided to client" ) { }
+	};*/
+	struct MessageDuplicate : Utilities::Exception {
+		MessageDuplicate() : Utilities::Exception( "Tried to add a message with an identical identifier to another message" ) { }
 	};
-	struct MessageDuplicate : public std::exception {
-		MessageDuplicate() : std::exception("Tried to add a message with an identical identifier to another message") {}
-	};
-	struct MessageFromInvalidThread : public std::exception {
-		MessageFromInvalidThread() : std::exception("A message can only be sent from the same thread that the client is running on.") {}
+	struct MessageFromInvalidThread : Utilities::Exception {
+		MessageFromInvalidThread() : Utilities::Exception( "A message can only be sent from the same thread that the client is running on." ) { }
 	};
 
 
@@ -45,32 +45,45 @@ namespace MP
 	public:
 		virtual ~Client() noexcept
 		{
-			Stop();
+			stop();
 		}
 
-		void AddMessageHandlerPair(const MessageHandlerPair& toAdd) {
-			if (const auto index = find(_messageIdentifiers, toAdd.identifier); index.has_value())
-				throw MessageDuplicate();
-			_messageIdentifiers.push_back(toAdd.identifier);
-			_messageHandlers.push_back(std::move(toAdd.handler));
-		}
-
-		virtual void Start(std::shared_ptr<Client> me) noexcept
+		void addMessageHandlerPair( const MessageHandlerPair& toAdd )
 		{
-			if (running)
+			if ( const auto index = find( _messageIdentifiers, toAdd.identifier ); index.has_value() )
+				throw MessageDuplicate();
+			_messageIdentifiers.push_back( toAdd.identifier );
+			_messageHandlers.push_back( std::move( toAdd.handler ) );
+		}
+
+		
+
+		virtual const Utilities::GUID identifier()const noexcept = 0;
+
+
+
+		MessageReturn sendMessage( Message&& message )
+		{
+			/*if ( std::this_thread::get_id() != _threadID )
+				throw MessageFromInvalidThread();*/
+			auto messageReturn = message.messageReturn.get_future();
+			_outgoingMessages.push( std::move( message ) );
+			return messageReturn;
+		}
+		virtual void start() noexcept
+		{
+			if ( running )
 				return;
 			running = true;
-			_myThread = std::thread(&Client::_threadEntryPoint, this, me);
+			_myThread = std::thread( &Client::_threadEntryPoint, this );
 		}
 
-		virtual void Stop() noexcept
+		virtual void stop() noexcept
 		{
 			running = false;
-			if(_myThread.joinable())
+			if ( _myThread.joinable() )
 				_myThread.join();
 		}
-
-		virtual const Utilities::GUID Identifier()const noexcept = 0;
 
 		inline auto& outgoingMessages() noexcept
 		{
@@ -80,78 +93,64 @@ namespace MP
 		{
 			return _incommingMessages;
 		}
-
-		MessageReturn sendMessage(Message&& message)
-		{
-			if (std::this_thread::get_id() != _threadID)
-				throw MessageFromInvalidThread();
-			auto messageReturn = message.messageReturn.get_future();
-			_outgoingMessages.push(std::move(message));
-			return messageReturn;
-		}
-
 	protected:
-		Client(std::shared_ptr<IMessageHub> messageHub, std::chrono::milliseconds timePerFrame) : _messageHub(messageHub), running(false), _timePerFrame(timePerFrame)
+		Client( std::chrono::milliseconds timePerFrame ) : running( false ), _timePerFrame( timePerFrame )
 		{
-			if (!_messageHub) throw NoMessageHub();
+	
 		};
-		Client(std::shared_ptr<IMessageHub> messageHub, std::chrono::milliseconds timePerFrame, const std::vector<MessageHandlerPair>& messageHandlerPairs)
-			: _messageHub(messageHub), running(false), _timePerFrame(timePerFrame)
+		Client( std::chrono::milliseconds timePerFrame, const std::vector<MessageHandlerPair>& messageHandlerPairs )
+			:running( false ), _timePerFrame( timePerFrame )
 		{
-			if (!_messageHub) throw NoMessageHub();
-			for (const auto& pair : messageHandlerPairs)
-				AddMessageHandlerPair(pair);
-		};
-		Client(std::shared_ptr<IMessageHub> messageHub, std::chrono::milliseconds timePerFrame, const std::vector<MessageHandlerPair>&& messageHandlerPairs)
-			: _messageHub(messageHub), running(false), _timePerFrame(timePerFrame)
-		{
-			if (!_messageHub) throw NoMessageHub();
-			for (const auto& pair : messageHandlerPairs)
-				AddMessageHandlerPair(pair);
+			for ( const auto& pair : messageHandlerPairs )
+				addMessageHandlerPair( pair );
+
 		};
 
-		virtual void _performDelayedActions() {}
-		virtual void _performOtherActions() {}
+
+		virtual void _performDelayedActions() { }
+		virtual void _performOtherActions() { }
 
 		
-	private:
 		
-		std::chrono::milliseconds _timePerFrame;
-		std::vector<Utilities::GUID> _messageIdentifiers;
-		std::vector<MessageHandler> _messageHandlers;
-		std::shared_ptr<IMessageHub> _messageHub;
-
-		bool running;
-		std::thread _myThread;
-		std::thread::id _threadID;
-
-		Utilities::CircularFiFo<Message> _incommingMessages;
-		Utilities::CircularFiFo<Message> _outgoingMessages;
-		
-		void _threadEntryPoint(std::shared_ptr<Client> me)
+		void _threadEntryPoint()
 		{
-			setLocalClient(me);
+			//setLocalClient(me);
 			_threadID = std::this_thread::get_id();
-			while (running)
+			while ( running )
 			{
 				const auto startTime = std::chrono::high_resolution_clock::now();
-				while (!_incommingMessages.wasEmpty())
+				while ( !_incommingMessages.isEmpty() )
 				{
-					auto message = std::move(_incommingMessages.top());
-					if (const auto& index = find(_messageIdentifiers, message.identifier); !index.has_value())
+					auto message = std::move( _incommingMessages.top() );
+					if ( const auto& index = find( _messageIdentifiers, message.identifier ); !index.has_value() )
 						index; // Unknown message recevied. Add a log or something.
 					else
-						_messageHandlers[*index](message);
+						_messageHandlers[*index]( message );
 					_incommingMessages.pop();
 				}
 				_performDelayedActions();
 				_performOtherActions();
 				const auto endTime = std::chrono::high_resolution_clock::now();
 				const auto executionTime = endTime - startTime;
-				if (executionTime < _timePerFrame) // We wait to lock the update frequency.
-					std::this_thread::sleep_for(_timePerFrame - executionTime);
+				if ( executionTime < _timePerFrame ) // We wait to lock the update frequency.
+					std::this_thread::sleep_for( _timePerFrame - executionTime );
 			}
 		}
+		bool running;
+	private:
+		
+		std::chrono::milliseconds _timePerFrame;
+		std::vector<Utilities::GUID> _messageIdentifiers;
+		std::vector<MessageHandler> _messageHandlers;
+
+		
+		std::thread _myThread;
+		std::thread::id _threadID;
+
+		Utilities::CircularFiFo<Message> _incommingMessages;
+		Utilities::CircularFiFo<Message> _outgoingMessages;
+
+		
 	};
 
 }
